@@ -13,17 +13,9 @@ int main(int argc, const char* argv[]) {
   size_t size_in_bytes;
   sscanf(argv[1], "%zu", &size_in_bytes);
 
-  SharedResource shared_resource;
-  SemaphoreGuard sem_guard{
-      2,
-      [&shared_resource, size_in_bytes] {
-        ftruncate(shared_resource.Handle(), size_in_bytes);
-      },
-      [&shared_resource] {
-        shm_unlink(shared_resource.Name().c_str());
-      }};
+  SharedResource shared_resource(2, size_in_bytes);
 
-  SharedMemory arena(shared_resource, size_in_bytes);
+  SharedMemory arena(shared_resource);
   StringList string_list(arena.Access());
 
   OutputChannel channel;

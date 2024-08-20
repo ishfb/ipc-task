@@ -1,4 +1,4 @@
-#include <sys/mman.h>
+
 #include <unistd.h>
 
 #include <iostream>
@@ -10,28 +10,11 @@ class SharedResource;
 class SharedMemory {
 public:
   explicit SharedMemory(
-      const SharedResource& shared_resource, size_t bytes) {
+      const SharedResource& shared_resource) {
   }
   ~SharedMemory() {}
 
   std::span<std::byte> Access() {}
-};
-
-template <typename AtEnter, typename AtExit>
-class SemaphoreGuard {
-public:
-  explicit SemaphoreGuard(size_t count, AtEnter at_enter,
-                          AtExit at_exit)
-      : count_(count),
-        at_enter_(at_enter),
-        at_exit_(at_exit) {}
-
-  ~SemaphoreGuard() {}
-
-private:
-  size_t count_;
-  AtEnter at_enter_;
-  AtExit at_exit_;
 };
 
 class StringList {
