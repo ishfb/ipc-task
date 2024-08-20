@@ -1,4 +1,5 @@
 #include "all.h"
+#include "log.h"
 #include "shared_resource.h"
 
 #include <iostream>
@@ -16,13 +17,14 @@ int main(int argc, const char* argv[]) {
   SharedResource shared_resource(2, size_in_bytes);
 
   SharedMemory arena(shared_resource);
-  StringList string_list(arena.Access());
+  // StringList string_list(arena.Access());
 
-  OutputChannel channel;
+  // OutputChannel channel;
 
-  for (std::string line; std::getline(std::cin, line);) {
-    string_list.Add(std::move(line));
-    channel.Send("new_line");
+  for (std::string line; std::getline(std::cin, line) && line != "exit";) {
+    // string_list.Add(std::move(line));
+    // channel.Send("new_line");
+    LOG("Got: " << line);
   }
 
   return 0;
