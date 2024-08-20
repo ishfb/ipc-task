@@ -1,4 +1,5 @@
 #include "all.h"
+#include "shared_resource.h"
 
 #include <iostream>
 
