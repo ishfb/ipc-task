@@ -7,16 +7,6 @@
 
 class SharedResource;
 
-class SharedMemory {
-public:
-  explicit SharedMemory(
-      const SharedResource& shared_resource) {
-  }
-  ~SharedMemory() {}
-
-  std::span<std::byte> Access() {}
-};
-
 class StringList {
 public:
   explicit StringList(std::span<std::byte> arena) {}
