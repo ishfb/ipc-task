@@ -25,10 +25,11 @@ void StringList::Add(std::string new_string) {
     return;
   }
 
-  std::optional<Range<RingBufferAllocator::iterator>> range;
+  std::optional<Range<RingBufferAllocator::Iterator>> range;
   while (!(range = string_allocator_.Allocate(new_string.size() + 1))) {
-    string_allocator_.Deallocate({begin_->first, begin_->last});
-    ++begin_;
+    const size_t bytes_to_deallocate = (**begin_).size();
+    ++(*begin_);
+    string_allocator_.Deallocate(bytes_to_deallocate);
   }
 
   *std::copy(new_string.begin(), new_string.end(), range->begin()) = char('\0');

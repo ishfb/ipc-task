@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <optional>
 #include <span>
+#include <tuple>
 
 template <typename Iter>
 class Range {
@@ -14,6 +15,8 @@ public:
   auto begin() const { return begin_; }
   auto end() const { return end_; }
 
+  auto size() const { return std::distance(begin_, end_); }
+
 private:
   Iter begin_, end_;
 };
@@ -22,15 +25,52 @@ class RingBufferAllocator {
 public:
   explicit RingBufferAllocator(std::span<char> arena);
 
-  using iterator = char*;
+  struct Iterator {
+    using iterator_category = std::forward_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = char;
+    using pointer = char*;
+    using reference = char&;
 
-  iterator begin() {}
-  iterator end() {}
+    Iterator(pointer base, size_t index, size_t size) : base_(base), index_(index), size_(size) {}
 
-  size_t Capacity() const {}
+    reference operator*() const { return base_[index_]; }
+    pointer operator->() { return base_ + index_; }
+    Iterator& operator++() {
+      index_ = (index_ + 1) % size_;
+      return *this;
+    }
+    Iterator operator++(int) {
+      Iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+    friend bool operator==(const Iterator& lhs, const Iterator& rhs) {
+      return std::tie(lhs.base_, lhs.index_, lhs.size_) == std::tie(rhs.base_, rhs.index_, rhs.size_);
+    };
+    friend bool operator!=(const Iterator& lhs, const Iterator& rhs) {
+      return std::tie(lhs.base_, lhs.index_, lhs.size_) != std::tie(rhs.base_, rhs.index_, rhs.size_);
+    };
 
-  std::optional<Range<iterator>> Allocate(size_t bytes);
-  void Deallocate(Range<iterator> region);
+  private:
+    pointer base_;
+    size_t index_;
+    size_t size_;
+  };
+
+  Iterator begin() { return begin_; }
+  Iterator end() { return end_; }
+
+  size_t Capacity() const { return arena_.size(); }
+
+  // Tries to allocate from the and of the ring buffer
+  std::optional<Range<Iterator>> Allocate(size_t bytes);
+  // Deallocates the first `bytes` bytes from the beginning of the ring buffer
+  void Deallocate(size_t bytes);
+
+private:
+  std::span<char> arena_;
+  Iterator begin_, end_;
 };
 
 class LinearAllocator {

@@ -6,8 +6,8 @@
 
 #include "ring_buffer_allocator.h"
 
-struct RingBufferString : public Range<RingBufferAllocator::iterator> {
-  using Range<RingBufferAllocator::iterator>::Range;
+struct RingBufferString : public Range<RingBufferAllocator::Iterator> {
+  using Range<RingBufferAllocator::Iterator>::Range;
 };
 
 std::ostream& operator<<(std::ostream& lhs, const RingBufferString& rhs);
@@ -15,11 +15,12 @@ std::ostream& operator<<(std::ostream& lhs, const RingBufferString& rhs);
 class StringListBase {
 public:
   struct iterator {
-    RingBufferAllocator::iterator first, last;
+    RingBufferAllocator::Iterator first, last;
 
     iterator& operator++() {}
     bool operator==(iterator) {}
     RingBufferString operator*() const { return {first, last}; }
+    
   };
 
 protected:
