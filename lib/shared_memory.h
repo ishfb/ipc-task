@@ -18,11 +18,11 @@ class SharedMemory {
 public:
   explicit SharedMemory(const SharedResource& shared_resource);
 
-  std::span<std::byte> Access() { return span_; }
+  std::span<char> Access() { return span_; }
 
-  std::span<const std::byte> Access() const { return span_; }
+  std::span<const char> Access() const { return span_; }
 
 private:
   std::unique_ptr<void, impl::MunmapDeleter> data_;
-  std::span<std::byte> span_;
+  std::span<char> span_;
 };

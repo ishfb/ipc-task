@@ -1,7 +1,10 @@
 #include <iostream>
 
 #include "all.h"
+#include "log.h"
+#include "shared_memory.h"
 #include "shared_resource.h"
+#include "string_list.h"
 
 int main(int argc, const char* argv[]) {
   if (argc != 2) {
@@ -14,16 +17,19 @@ int main(int argc, const char* argv[]) {
 
   SharedResource shared_resource(2, size_in_bytes);
 
-  // SharedMemory arena(shared_resource);
-  // const StringList string_list(arena.Access());
+  SharedMemory arena(shared_resource);
+  const StringListView string_list(arena.Access());
 
   // InputChannel channel;
 
   for (std::string line; std::getline(std::cin, line);) {
     if (line == "H") {
-      // for (const auto& str : string_list) {
-      //   std::cout << str << '\n';
-      // }
+      for (const auto& str : string_list) {
+        std::cout << str << '\n';
+      }
+    }
+    if (line == "B") {
+      std::cout << string_list.back() << '\n';
     }
     if (line == "exit") {
       break;
