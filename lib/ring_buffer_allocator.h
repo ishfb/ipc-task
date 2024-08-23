@@ -61,7 +61,7 @@ public:
   Iterator begin() { return begin_; }
   Iterator end() { return end_; }
 
-  size_t Capacity() const { return arena_.size(); }
+  size_t Capacity() const { return arena_.size() - 1; }
 
   // Tries to allocate from the and of the ring buffer
   std::optional<Range<Iterator>> Allocate(size_t bytes);

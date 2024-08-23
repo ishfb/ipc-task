@@ -35,7 +35,7 @@ TEST(RingBufferAllocatorTest, AllocateAndDeallocate) {
   ASSERT_TRUE(range1.has_value());
   EXPECT_EQ(range1.value().size(), 8);
 
-  // Allocate 4 bytes
+  // Allocate 4 bytes, total 12 bytes allocated
   auto range2 = allocator.Allocate(4);
   ASSERT_TRUE(range2.has_value());
   EXPECT_EQ(range2.value().size(), 4);
@@ -49,31 +49,43 @@ TEST(RingBufferAllocatorTest, AllocateAndDeallocate) {
     EXPECT_EQ(allocator.begin(), saved_begin);
     EXPECT_EQ(allocator.end(), saved_end);
   }
-  // Deallocate the first allocation
+  // Deallocate the first allocation, total 4 bytes allocated
   allocator.Deallocate(range1.value().size());
 
   // Allocate 6 bytes (should fit in the previously deallocated space)
+  // total 10 bytes allocated
   auto range4 = allocator.Allocate(6);
   ASSERT_TRUE(range4.has_value());
   EXPECT_EQ(range4.value().size(), 6);
 
-  // Try to allocate 12 bytes (not enough space)
-  for (size_t bytes : {7, 12}) {
+  for (size_t bytes : {6, 7, 12}) {
     auto range5 = allocator.Allocate(bytes);
     EXPECT_FALSE(range5.has_value());
   }
-  EXPECT_TRUE(allocator.Allocate(6).has_value());
+  EXPECT_TRUE(allocator.Allocate(5).has_value());
 }
 
 TEST(RingBufferAllocatorTest, Capacity) {
-  std::array<char, 19> arena;  // Example arena with 16 bytes
+  std::array<char, 19> arena;
   RingBufferAllocator allocator(arena);
 
-  EXPECT_EQ(allocator.Capacity(), 19);
+  EXPECT_EQ(allocator.Capacity(), 18);
 
   allocator.Allocate(10);
 
-  EXPECT_EQ(allocator.Capacity(), 19);
+  EXPECT_EQ(allocator.Capacity(), 18);
   allocator.Deallocate(8);
-  EXPECT_EQ(allocator.Capacity(), 19);
+  EXPECT_EQ(allocator.Capacity(), 18);
+}
+
+TEST(RingBufferAllocatorTest, FullAndEmpty) {
+  std::array<char, 27> arena;
+  RingBufferAllocator allocator(arena);
+
+  EXPECT_EQ(allocator.begin(), allocator.end());
+  allocator.Allocate(25);
+  allocator.Deallocate(23);
+  allocator.Allocate(24);
+  EXPECT_NE(allocator.begin(), allocator.end());
+  EXPECT_FALSE(allocator.Allocate(1).has_value());
 }
