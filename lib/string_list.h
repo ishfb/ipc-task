@@ -2,7 +2,7 @@
 
 #include <ostream>
 #include <span>
-#include <string>
+#include <string_view>
 
 #include "ring_buffer_allocator.h"
 
@@ -38,7 +38,7 @@ public:
   explicit StringList(std::span<char> arena);
   ~StringList() {}
 
-  void Add(std::string new_string);
+  void Add(std::string_view new_string);
 
 private:
   RingBufferAllocator string_allocator_;

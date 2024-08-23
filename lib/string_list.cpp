@@ -19,7 +19,7 @@ std::ostream& operator<<(std::ostream& lhs, const RingBufferString& rhs) {
   return lhs;
 }
 
-void StringList::Add(std::string new_string) {
+void StringList::Add(std::string_view new_string) {
   if (new_string.size() > string_allocator_.Capacity()) {
     LOG("no space for " << new_string);
     return;
