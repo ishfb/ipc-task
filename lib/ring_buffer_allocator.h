@@ -71,6 +71,7 @@ public:
 private:
   std::span<char> arena_;
   Iterator begin_, end_;
+  size_t allocated_bytes_ = 0;
 };
 
 class LinearAllocator {

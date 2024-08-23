@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <string_view>
 #include <string>
+#include <string_view>
 
 #include "ring_buffer_allocator.h"
 
@@ -15,15 +15,15 @@ TEST(RingBufferAllocatorIterator, Increment) {
   for (auto& letter : letters) {
     letter = *it;
     ++it;
-  } 
+  }
   EXPECT_EQ(letters, "abcdefabcdefabcdef");
 }
 
 TEST(RingBufferAllocatorIterator, CrossBoundary) {
-    std::string arena = "abcdef";
-    RingBufferAllocator::Iterator begin(arena.data(), 4, arena.size());
-    RingBufferAllocator::Iterator end(arena.data(), 2, arena.size());
-    EXPECT_EQ(std::string(begin, end), "efab");
+  std::string arena = "abcdef";
+  RingBufferAllocator::Iterator begin(arena.data(), 4, arena.size());
+  RingBufferAllocator::Iterator end(arena.data(), 2, arena.size());
+  EXPECT_EQ(std::string(begin, end), "efab");
 }
 
 TEST(RingBufferAllocatorTest, AllocateAndDeallocate) {
@@ -41,9 +41,14 @@ TEST(RingBufferAllocatorTest, AllocateAndDeallocate) {
   EXPECT_EQ(range2.value().size(), 4);
 
   // Try to allocate 10 bytes (not enough space)
-  auto range3 = allocator.Allocate(10);
-  EXPECT_FALSE(range3.has_value());
-
+  {
+    auto saved_begin = allocator.begin();
+    auto saved_end = allocator.end();
+    auto range3 = allocator.Allocate(10);
+    EXPECT_FALSE(range3.has_value());
+    EXPECT_EQ(allocator.begin(), saved_begin);
+    EXPECT_EQ(allocator.end(), saved_end);
+  }
   // Deallocate the first allocation
   allocator.Deallocate(range1.value().size());
 
@@ -53,17 +58,11 @@ TEST(RingBufferAllocatorTest, AllocateAndDeallocate) {
   EXPECT_EQ(range4.value().size(), 6);
 
   // Try to allocate 12 bytes (not enough space)
-  auto range5 = allocator.Allocate(12);
-  EXPECT_FALSE(range5.has_value());
-}
-
-TEST(RingBufferAllocatorTest, AllocateZeroBytes) {
-  std::array<char, 16> arena;  // Example arena with 16 bytes
-  RingBufferAllocator allocator(arena);
-
-  // Try to allocate 0 bytes
-  auto range = allocator.Allocate(0);
-  EXPECT_FALSE(range.has_value());
+  for (size_t bytes : {7, 12}) {
+    auto range5 = allocator.Allocate(bytes);
+    EXPECT_FALSE(range5.has_value());
+  }
+  EXPECT_TRUE(allocator.Allocate(6).has_value());
 }
 
 TEST(RingBufferAllocatorTest, Capacity) {
