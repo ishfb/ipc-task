@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <optional>
 #include <span>
 
@@ -32,12 +33,29 @@ public:
   void Deallocate(Range<iterator> region);
 };
 
-class LinearAllocator  {
-  public:
-  explicit LinearAllocator(std::span<char> arena) {}
+class LinearAllocator {
+public:
+  explicit LinearAllocator(std::span<char> arena) : arena_(arena) {}
 
-  template<typename T>
-  T* AllocateFor(T*) {}
+  template <typename T>
+  T* AllocateFor(T*) {
+    if (arena_.size() < sizeof(T)) {
+      return nullptr;
+    }
 
-  std::span<char> FreeSpace() const {}
+    auto alignment = alignof(T);
+    auto offset = (alignment - (reinterpret_cast<uintptr_t>(arena_.data()) % alignment)) % alignment;
+    if (arena_.size() < sizeof(T) + offset) {
+      return nullptr;
+    }
+
+    auto ptr = reinterpret_cast<T*>(arena_.data() + offset);
+    arena_ = arena_.subspan(sizeof(T) + offset);
+    return ptr;
+  }
+
+  std::span<char> FreeSpace() const { return arena_; }
+
+private:
+  std::span<char> arena_;
 };
