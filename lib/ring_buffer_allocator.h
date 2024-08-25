@@ -25,41 +25,47 @@ class RingBufferAllocator {
 public:
   explicit RingBufferAllocator(std::span<char> arena);
 
-  struct Iterator {
+  template <typename T>
+  struct IteratorBase {
     using iterator_category = std::forward_iterator_tag;
     using difference_type = std::ptrdiff_t;
-    using value_type = char;
-    using pointer = char*;
-    using reference = char&;
+    using value_type = T;
+    using pointer = T*;
+    using reference = T&;
 
-    Iterator(pointer base, size_t index, size_t size) : base_(base), index_(index), size_(size) {}
+    IteratorBase(T* base, size_t index, size_t size) : base_(base), index_(index), size_(size) {}
 
-    reference operator*() const { return base_[index_]; }
-    pointer operator->() { return base_ + index_; }
-    Iterator& operator++() {
+    T& operator*() const { return base_[index_]; }
+    T* operator->() { return base_ + index_; }
+    IteratorBase& operator++() {
       index_ = (index_ + 1) % size_;
       return *this;
     }
-    Iterator operator++(int) {
-      Iterator tmp = *this;
+    IteratorBase operator++(int) {
+      IteratorBase tmp = *this;
       ++(*this);
       return tmp;
     }
-    friend bool operator==(const Iterator& lhs, const Iterator& rhs) {
+    friend bool operator==(const IteratorBase& lhs, const IteratorBase& rhs) {
       return std::tie(lhs.base_, lhs.index_, lhs.size_) == std::tie(rhs.base_, rhs.index_, rhs.size_);
     };
-    friend bool operator!=(const Iterator& lhs, const Iterator& rhs) {
+    friend bool operator!=(const IteratorBase& lhs, const IteratorBase& rhs) {
       return std::tie(lhs.base_, lhs.index_, lhs.size_) != std::tie(rhs.base_, rhs.index_, rhs.size_);
     };
 
-  private:
-    pointer base_;
+    T* base_;
     size_t index_;
     size_t size_;
   };
 
+  using Iterator = IteratorBase<char>;
+  using ConstIterator = IteratorBase<const char>;
+
   Iterator begin() { return begin_; }
   Iterator end() { return end_; }
+
+  ConstIterator begin() const { return {begin_.base_, begin_.index_, begin_.size_}; }
+  ConstIterator end() const { return {end_.base_, end_.index_, end_.size_}; }
 
   size_t Capacity() const { return arena_.size() - 1; }
 
