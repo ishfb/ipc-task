@@ -58,6 +58,8 @@ public:
     return *back;
   }
 
+  bool empty() const { return begin_ == end_; }
+
 protected:
   LinearAllocator nodes_allocator_;
   size_t& begin_;

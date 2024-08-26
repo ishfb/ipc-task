@@ -29,7 +29,11 @@ int main(int argc, const char* argv[]) {
       }
     }
     if (line == "B") {
-      std::cout << string_list.back() << '\n';
+      if (string_list.empty()) {
+        LOG("StringList is empty");
+      } else {
+        std::cout << string_list.back() << '\n';
+      }
     }
     if (line == "exit") {
       break;

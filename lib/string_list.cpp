@@ -4,21 +4,27 @@
 
 StringList::StringList(std::span<char> arena) : StringListView(arena) {
   begin_ = end_ = back_ = string_allocator_.begin().index_;
+  LOG("StringList: available memory " << string_allocator_.Capacity());
 }
 
 void StringList::Add(std::string_view new_string) {
-  if (new_string.size() > string_allocator_.Capacity()) {
-    LOG("no space for " << new_string);
+  if (new_string.size() >= string_allocator_.Capacity()) {
+    LOG("no space for " << new_string << ". Capacity = " << string_allocator_.Capacity()
+                        << ", string size = " << new_string.size());
     return;
   }
 
   auto begin = this->begin();
 
   std::optional<Range<RingBufferAllocator::Iterator>> range;
-  while (!(range = string_allocator_.Allocate(new_string.size() + 1))) {
+  const size_t bytes_to_allocate = new_string.size() + 1;
+  while (!(range = string_allocator_.Allocate(bytes_to_allocate))) {
     auto old_begin = begin++;
-    string_allocator_.Deallocate(std::distance(old_begin.Base(), begin.Base()));
+    const size_t bytes_to_deallocate = std::distance(old_begin.Base(), begin.Base());
+    LOG("Failed to allocate " << bytes_to_allocate << " bytes. Deallocating " << bytes_to_deallocate << " bytes");
+    string_allocator_.Deallocate(bytes_to_deallocate);
   }
+  LOG("Allocated " << bytes_to_allocate << " bytes, free space: " << string_allocator_.FreeSpace());
 
   begin_ = begin.Base().index_;
 
