@@ -40,6 +40,8 @@ TEST(RingBufferAllocatorTest, AllocateAndDeallocate) {
   ASSERT_TRUE(range2.has_value());
   EXPECT_EQ(range2.value().size(), 4);
 
+  ASSERT_EQ(range1->end(), range2->begin());
+
   // Try to allocate 10 bytes (not enough space)
   {
     auto saved_begin = allocator.begin();

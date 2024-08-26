@@ -9,7 +9,7 @@ std::optional<Range<RingBufferAllocator::Iterator>> RingBufferAllocator::Allocat
   allocated_bytes_ += bytes;
   auto new_end = std::next(end_, bytes);
   Range ret(end_, new_end);
-  new_end = end_;
+  end_ = new_end;
   return ret;
 }
 
