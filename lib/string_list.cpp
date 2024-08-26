@@ -2,14 +2,15 @@
 
 #include "log.h"
 
-StringListBase::StringListBase(std::span<char> arena)
+StringListView::StringListView(std::span<char> arena)
     : nodes_allocator_(arena),
-      begin_(nodes_allocator_.AllocateFor(begin_)),
-      end_(nodes_allocator_.AllocateFor(end_)),
-      back_(nodes_allocator_.AllocateFor(back_)) {}
+      begin_(*nodes_allocator_.AllocateFor(&begin_)),
+      end_(*nodes_allocator_.AllocateFor(&end_)),
+      back_(*nodes_allocator_.AllocateFor(&back_)),
+      string_allocator_(nodes_allocator_.FreeSpace()) {}
 
-StringList::StringList(std::span<char> arena) : StringListBase(arena), string_allocator_(nodes_allocator_.FreeSpace()) {
-  *begin_ = *end_ = *back_ = {string_allocator_.begin(), string_allocator_.begin()};
+StringList::StringList(std::span<char> arena) : StringListView(arena) {
+  begin_ = end_ = back_ = string_allocator_.begin().index_;
 }
 
 std::ostream& operator<<(std::ostream& lhs, const RingBufferString& rhs) {
@@ -25,20 +26,22 @@ void StringList::Add(std::string_view new_string) {
     return;
   }
 
+  auto begin = this->begin();
+
   std::optional<Range<RingBufferAllocator::Iterator>> range;
   while (!(range = string_allocator_.Allocate(new_string.size() + 1))) {
-    const size_t bytes_to_deallocate = (**begin_).size();
-    ++(*begin_);
-    string_allocator_.Deallocate(bytes_to_deallocate);
+    auto old_begin = begin++;
+    string_allocator_.Deallocate(std::distance(old_begin, begin));
   }
 
-  *std::copy(new_string.begin(), new_string.end(), range->begin()) = char('\0');
+  auto string_end = std::copy(new_string.begin(), new_string.end(), range->begin());
+  *string_end = '\0';
+  ++string_end;
 
-  back_->first = range->begin();
-  back_->last = range->end();
+  back_ = range->begin().index_;
 
-  if (*begin_ == *end_) {
-    *begin_ = *back_;
+  if (begin_ == end_) {
+    begin_ = back_;
   }
-  end_->first = end_->last = back_->last;
+  end_ = string_end.index_;
 }
