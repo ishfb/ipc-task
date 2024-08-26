@@ -17,8 +17,10 @@ void StringList::Add(std::string_view new_string) {
   std::optional<Range<RingBufferAllocator::Iterator>> range;
   while (!(range = string_allocator_.Allocate(new_string.size() + 1))) {
     auto old_begin = begin++;
-    string_allocator_.Deallocate(std::distance(old_begin, begin));
+    string_allocator_.Deallocate(std::distance(old_begin.Base(), begin.Base()));
   }
+
+  begin_ = begin.Base().index_;
 
   auto string_end = std::copy(new_string.begin(), new_string.end(), range->begin());
   *string_end = '\0';

@@ -36,6 +36,8 @@ public:
     friend bool operator==(const ConstIterator& lhs, const ConstIterator& rhs) { return lhs.base_ == rhs.base_; };
     friend bool operator!=(const ConstIterator& lhs, const ConstIterator& rhs) { return lhs.base_ != rhs.base_; };
 
+    RingBufferAllocator::ConstIterator Base() const { return base_; } 
+
   private:
     RingBufferAllocator::ConstIterator base_;
 

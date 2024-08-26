@@ -1,9 +1,17 @@
 #include <gtest/gtest.h>
 
 #include "string_list_view.h"
+#include "string_list_view_test_helper.h"
 
-bool operator==(const char* lhs, const RingBufferString& rhs) { return lhs == std::string(rhs.begin(), rhs.end()); }
-bool operator==(const RingBufferString& lhs, const char* rhs) { return std::string(lhs.begin(), lhs.end()) == rhs; }
+TEST(RingBufferStringTest, Serialization) {
+  std::string arena = "abcdef";
+  RingBufferString s({arena.data(), 4, arena.size()}, {arena.data(), 1, arena.size()});
+
+  std::ostringstream out;
+  out << s;
+
+  EXPECT_EQ(out.str(), "efa");
+}
 
 class StringListViewTest : public ::testing::Test {
 protected:
