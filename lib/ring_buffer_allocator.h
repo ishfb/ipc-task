@@ -53,6 +53,10 @@ public:
       return std::tie(lhs.base_, lhs.index_, lhs.size_) != std::tie(rhs.base_, rhs.index_, rhs.size_);
     };
 
+    IteratorBase WithIndex(size_t another_index) const {
+      return {base_, another_index, size_};
+    }
+
     T* base_;
     size_t index_;
     size_t size_;
