@@ -1,28 +1,13 @@
 #include <iostream>
 
 #include "all.h"
+#include "environment.h"
 #include "log.h"
-#include "shared_memory.h"
-#include "shared_resource.h"
-#include "string_list.h"
-#include "unlink_guard.h"
+#include "string_list_view.h"
 
 int main(int argc, const char* argv[]) {
-  if (argc != 2) {
-    std::cerr << "Usage: writer <shared memory size in bytes>\n";
-    return 1;
-  }
-
-  size_t size_in_bytes;
-  sscanf(argv[1], "%zu", &size_in_bytes);
-
-  SharedResource shared_resource(size_in_bytes);
-  SharedMemory arena(shared_resource);
-
-  LinearAllocator allocator(arena.Access());
-  UnlinkGuard unlink_guard(*allocator.AllocateFor<size_t>(nullptr), shared_resource.Name());
-
-  const StringListView string_list(allocator.FreeSpace());
+  Environment env(argc, argv);
+  const StringListView string_list(env.StringListArena());
 
   // InputChannel channel;
 
