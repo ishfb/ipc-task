@@ -1,9 +1,12 @@
 #include "environment.h"
 
+#include <unistd.h>
+
+#include <csignal>
+#include <cstring>
 #include <iostream>
 
 #include "log.h"
-
 Environment::Environment(int argc, const char* argv[])
     : args_parser_(argc, argv),
       shared_resource_(args_parser_.size_in_bytes),
@@ -24,4 +27,13 @@ Environment::ArgsParser::ArgsParser(int argc, const char* argv[]) {
   if (argc == 3 && std::string(argv[2]) == "-v") {
     SetVerbose(true);
   }
+
+  sigset_t signalSet;
+  sigfillset(&signalSet);  // Инициализируем набор, включив в него все сигналы
+
+  // Блокируем все сигналы, кроме SIGKILL и SIGSTOP
+  if (sigprocmask(SIG_BLOCK, &signalSet, nullptr) != 0) {
+    std::cerr << "Failed to block all signals " << strerror(errno) << std::endl;
+    std::terminate();
+  } 
 }
