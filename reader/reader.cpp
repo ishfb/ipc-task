@@ -16,7 +16,7 @@ int main(int argc, const char* argv[]) {
   size_t size_in_bytes;
   sscanf(argv[1], "%zu", &size_in_bytes);
 
-  SharedResource shared_resource(2, size_in_bytes);
+  SharedResource shared_resource(size_in_bytes);
   SharedMemory arena(shared_resource);
 
   LinearAllocator allocator(arena.Access());

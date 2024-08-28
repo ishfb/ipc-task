@@ -4,7 +4,7 @@
 
 class SharedResource {
 public:
-  SharedResource(size_t owner_count, size_t size_in_bytes, const std::string& name = "");
+  SharedResource(size_t size_in_bytes, const std::string& name = "");
   ~SharedResource();
 
   using ShmId = int;
