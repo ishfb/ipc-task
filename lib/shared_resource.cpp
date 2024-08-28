@@ -19,6 +19,5 @@ SharedResource::SharedResource(size_t owner_count, size_t size_in_bytes, const s
 }
 
 SharedResource::~SharedResource() {
-  auto ret = shm_unlink(name_.c_str());
-  LOG("Release shared resource with name: " << name_ << ". Ret = " << ret << ", errno = " << errno);
+  close(handle_);
 }

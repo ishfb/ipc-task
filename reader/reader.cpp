@@ -5,6 +5,7 @@
 #include "shared_memory.h"
 #include "shared_resource.h"
 #include "string_list.h"
+#include "unlink_guard.h"
 
 int main(int argc, const char* argv[]) {
   if (argc != 2) {
@@ -16,9 +17,12 @@ int main(int argc, const char* argv[]) {
   sscanf(argv[1], "%zu", &size_in_bytes);
 
   SharedResource shared_resource(2, size_in_bytes);
-
   SharedMemory arena(shared_resource);
-  const StringListView string_list(arena.Access());
+
+  LinearAllocator allocator(arena.Access());
+  UnlinkGuard unlink_guard(*allocator.AllocateFor<size_t>(nullptr), shared_resource.Name());
+
+  const StringListView string_list(allocator.FreeSpace());
 
   // InputChannel channel;
 
