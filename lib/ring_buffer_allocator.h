@@ -90,7 +90,7 @@ public:
   explicit LinearAllocator(std::span<char> arena) : arena_(arena) {}
 
   template <typename T>
-  T* AllocateFor(T*) {
+  T* AllocateFor(T* = nullptr) {
     if (arena_.size() < sizeof(T)) {
       return nullptr;
     }

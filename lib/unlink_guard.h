@@ -1,13 +1,14 @@
 #pragma once
 
+#include <atomic>
 #include <string>
 
 class UnlinkGuard {
 public:
-  explicit UnlinkGuard(size_t& reference_counter, std::string name);
+  explicit UnlinkGuard(std::atomic<size_t>& reference_counter, std::string name);
   ~UnlinkGuard();
 
 private:
-  size_t& reference_counter_;
+  std::atomic<size_t>& reference_counter_;
   std::string name_;
 };

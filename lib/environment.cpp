@@ -9,7 +9,7 @@ Environment::Environment(int argc, const char* argv[])
       shared_resource_(args_parser_.size_in_bytes),
       shared_memory_(shared_resource_),
       ref_count_allocator_(shared_memory_.Access()),
-      unlink_guard_(*ref_count_allocator_.AllocateFor<size_t>(nullptr), shared_resource_.Name()),
+      unlink_guard_(*ref_count_allocator_.AllocateFor<std::atomic<size_t>>(), shared_resource_.Name()),
       string_list_arena_(ref_count_allocator_.FreeSpace()) {
   
 }

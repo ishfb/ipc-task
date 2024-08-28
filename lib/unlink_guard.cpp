@@ -5,7 +5,7 @@
 
 #include "log.h"
 
-UnlinkGuard::UnlinkGuard(size_t& reference_counter, std::string name)
+UnlinkGuard::UnlinkGuard(std::atomic<size_t>& reference_counter, std::string name)
     : reference_counter_(reference_counter), name_(std::move(name)) {
   ++reference_counter_;
   LOG("Shared resource with name " << name_ << " reference_counter = " << reference_counter_);
