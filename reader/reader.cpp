@@ -19,14 +19,11 @@ int main(int argc, const char* argv[]) {
     }
   });
 
-  for (std::string line; std::getline(std::cin, line);) {
-    if (line == "H") {
+ for (std::string line; std::getline(std::cin, line) && line != "Q";) {
+     if (line == "H") {
       for (const auto& str : string_list) {
         std::cout << str << '\n';
       }
-    }
-    if (line == "exit") {
-      break;
     }
   }
 

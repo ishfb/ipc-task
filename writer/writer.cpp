@@ -9,7 +9,7 @@ int main(int argc, const char* argv[]) {
   Environment env(argc, argv);
   StringList string_list(env.StringListArena());
 
-  for (std::string line; std::getline(std::cin, line) && line != "exit";) {
+  for (std::string line; std::getline(std::cin, line) && line != "Q";) {
     string_list.Add(std::move(line));
     env.GetIpcChannel().Send();
   }
