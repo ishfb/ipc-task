@@ -1,14 +1,17 @@
 #pragma once
 
+#include <semaphore.h>
+
 #include <atomic>
 
 class IpcChannel {
 public:
-  IpcChannel(std::atomic<size_t>& counter);
+  IpcChannel();
+  ~IpcChannel();
 
   void Send();
   bool TryReceive();
 
 private:
-  std::atomic<size_t>& counter_;
+  sem_t* semaphore_;
 };

@@ -1,13 +1,33 @@
 #include "channel.h"
 
-IpcChannel::IpcChannel(std::atomic<size_t>& counter) : counter_(counter) {}
+#include <fcntl.h>    /* For O_* constants */
+#include <sys/stat.h> /* For mode constants */
 
-void IpcChannel::Send() { ++counter_; }
+#include <iostream>
+#include <string>
+
+#include "log.h"
+
+const std::string kSemaphoreDefaultName = "/ipc_task_semaphore";
+
+IpcChannel::IpcChannel() : semaphore_(sem_open(kSemaphoreDefaultName.c_str(), O_CREAT, S_IRWXU, 0)) {
+  if (semaphore_ == SEM_FAILED) {
+    std::cerr << "Failed to create semaphore " << kSemaphoreDefaultName << ", errno = " << errno << std::endl;
+    std::terminate();
+  }
+}
+
+IpcChannel::~IpcChannel() {
+  auto ret = sem_close(semaphore_);
+  LOG("sem_close ret = " << ret << ", errno = " << errno);
+}
+
+void IpcChannel::Send() { sem_post(semaphore_); }
 
 bool IpcChannel::TryReceive() {
-  auto counter_value = counter_.load();
-  if (counter_value > 0) {
-    return counter_.compare_exchange_weak(counter_value, counter_value - 1);
-  }
-  return false;
+  struct timespec timeout;
+  clock_gettime(CLOCK_REALTIME, &timeout);
+  timeout.tv_sec += 1;  // Set timeout to 1 second
+
+  return sem_timedwait(semaphore_, &timeout) == 0;
 }
