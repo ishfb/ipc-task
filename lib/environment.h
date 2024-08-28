@@ -16,7 +16,6 @@ public:
 private:
   struct ArgsParser {
     size_t size_in_bytes;
-    bool verbose = false;
 
     ArgsParser(int argc, const char* argv[]);
   };
