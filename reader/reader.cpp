@@ -1,6 +1,7 @@
+#include <atomic>
 #include <iostream>
+#include <thread>
 
-#include "all.h"
 #include "environment.h"
 #include "log.h"
 #include "string_list_view.h"
@@ -9,7 +10,14 @@ int main(int argc, const char* argv[]) {
   Environment env(argc, argv);
   const StringListView string_list(env.StringListArena());
 
-  // InputChannel channel;
+  std::atomic_flag should_stop = ATOMIC_FLAG_INIT;
+  std::thread ipc_thread([&] {
+    while (!should_stop.test()) {
+      if (env.GetIpcChannel().TryReceive()) {
+        std::cout << string_list.back() << '\n';
+      }
+    }
+  });
 
   for (std::string line; std::getline(std::cin, line);) {
     if (line == "H") {
@@ -17,20 +25,13 @@ int main(int argc, const char* argv[]) {
         std::cout << str << '\n';
       }
     }
-    if (line == "B") {
-      if (string_list.empty()) {
-        LOG("StringList is empty");
-      } else {
-        std::cout << string_list.back() << '\n';
-      }
-    }
     if (line == "exit") {
       break;
     }
-    // if (channel.TryReceive(line) && line == "new_line") {
-    //   std::cout << string_list.back() << '\n';
-    // }
   }
+
+  should_stop.test_and_set();
+  ipc_thread.join();
 
   return 0;
 }

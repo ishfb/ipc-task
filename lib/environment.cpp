@@ -10,9 +10,8 @@ Environment::Environment(int argc, const char* argv[])
       shared_memory_(shared_resource_),
       ref_count_allocator_(shared_memory_.Access()),
       unlink_guard_(*ref_count_allocator_.AllocateFor<std::atomic<size_t>>(), shared_resource_.Name()),
-      string_list_arena_(ref_count_allocator_.FreeSpace()) {
-  
-}
+      ipc_channel_(*ref_count_allocator_.AllocateFor<std::atomic<size_t>>()),
+      string_list_arena_(ref_count_allocator_.FreeSpace()) {}
 
 Environment::ArgsParser::ArgsParser(int argc, const char* argv[]) {
   if (argc < 2) {
