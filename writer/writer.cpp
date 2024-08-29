@@ -18,7 +18,7 @@ int main(int argc, const char* argv[]) {
                   [](RingBufferString str) { std::cout << str << '\n'; });
     } else {
       string_list.Add(std::move(line));
-      trie = Trie<RingBufferString>(string_list);
+      trie = Trie<RingBufferString>{string_list};
 
       env.GetIpcChannel().Send();
     }
