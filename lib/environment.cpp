@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "log.h"
+
 Environment::Environment(int argc, const char* argv[])
     : args_parser_(argc, argv),
       shared_resource_(args_parser_.size_in_bytes),
@@ -18,7 +19,7 @@ Environment::Environment(int argc, const char* argv[])
 
 Environment::ArgsParser::ArgsParser(int argc, const char* argv[]) {
   if (argc < 2) {
-    std::cerr << "Usage: writer <shared memory size in bytes> [-v]\n";
+    std::cerr << "Usage: " << argv[0] << " <shared memory size in bytes> [-v]\n";
     std::exit(1);
   }
 
@@ -35,5 +36,5 @@ Environment::ArgsParser::ArgsParser(int argc, const char* argv[]) {
   if (sigprocmask(SIG_BLOCK, &signalSet, nullptr) != 0) {
     std::cerr << "Failed to block all signals " << strerror(errno) << std::endl;
     std::terminate();
-  } 
+  }
 }
