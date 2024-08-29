@@ -2,6 +2,10 @@
 
 #include <string_view>
 #include <type_traits>
+#include <unordered_map>
+#include <vector>
+
+#include "log.h"
 
 template <typename T>
 concept StringLike = requires(const T& t) {
@@ -40,7 +44,7 @@ public:
   }
 
   void Remove(const char* word) { Remove(std::string_view(word)); }
-  
+
   void Remove(const StringLike auto& word) {
     size_t node = 0;
     for (char c : word) {
@@ -53,10 +57,12 @@ public:
   }
 
   void Gather(const StringLike auto& prefix, std::regular_invocable<std::string_view> auto callback) const {
+    LOG("Start gather for prefix " << prefix);
     size_t node = 0;
     for (char c : prefix) {
       auto& children = nodes_[node].children_;
       if (auto it = children.find(c); it == children.end()) {
+        // LOG("No subtree found");
         return;
       } else {
         node = it->second;
@@ -69,7 +75,9 @@ public:
 
 private:
   void DoGather(size_t node, std::string& cur_prefix, std::regular_invocable<std::string_view> auto callback) const {
+    // LOG("DoGather, prefix = " << cur_prefix);
     if (nodes_[node].terminal_) {
+      LOG("DoGather — match with " << cur_prefix);
       callback(cur_prefix);
     }
 
