@@ -3,7 +3,9 @@
 #include "log.h"
 
 StringList::StringList(std::span<char> arena) : StringListView(arena) {
-  begin_ = end_ = back_ = string_allocator_.begin().index_;
+  begin_ = string_allocator_.begin().index_;
+  end_ = string_allocator_.begin().index_;
+  back_ = string_allocator_.begin().index_;
   LOG("StringList: available memory " << string_allocator_.Capacity());
 }
 

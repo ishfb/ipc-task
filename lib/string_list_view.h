@@ -63,8 +63,8 @@ public:
 
 protected:
   LinearAllocator nodes_allocator_;
-  size_t& begin_;
-  size_t& end_;
-  size_t& back_;
+  volatile size_t& begin_;
+  volatile size_t& end_;
+  volatile size_t& back_;
   RingBufferAllocator string_allocator_;
 };
