@@ -12,7 +12,7 @@ int main(int argc, const char* argv[]) {
   const StringListView string_list(env.StringListArena());
 
   std::mutex trie_mutex;
-  Trie trie;
+  Trie trie{string_list};
 
   std::atomic_flag should_stop = ATOMIC_FLAG_INIT;
   std::thread ipc_thread([&] {
