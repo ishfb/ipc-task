@@ -19,9 +19,10 @@ int main(int argc, const char* argv[]) {
     while (!should_stop.test()) {
       if (env.GetIpcChannel().TryReceive()) {
         std::cout << string_list.back() << '\n';
-
+        Trie<RingBufferString> new_trie(string_list);
+        
         std::lock_guard lock(trie_mutex);
-        trie = Trie<RingBufferString>(string_list);
+        trie = std::move(new_trie);
       }
     }
   });
