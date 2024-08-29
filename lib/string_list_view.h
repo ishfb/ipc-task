@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <ostream>
+#include <ranges>
 
 #include "ring_buffer_allocator.h"
 

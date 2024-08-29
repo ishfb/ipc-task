@@ -12,15 +12,15 @@ int main(int argc, const char* argv[]) {
   const StringListView string_list(env.StringListArena());
 
   std::mutex trie_mutex;
-  Trie<RingBufferString> trie;
+  Trie trie;
 
   std::atomic_flag should_stop = ATOMIC_FLAG_INIT;
   std::thread ipc_thread([&] {
     while (!should_stop.test()) {
       if (env.GetIpcChannel().TryReceive()) {
         std::cout << string_list.back() << '\n';
-        Trie<RingBufferString> new_trie(string_list);
-        
+        Trie new_trie{string_list};
+
         std::lock_guard lock(trie_mutex);
         trie = std::move(new_trie);
       }
@@ -35,7 +35,7 @@ int main(int argc, const char* argv[]) {
     } else if (line[0] == '/') {
       std::lock_guard lock(trie_mutex);
       trie.Gather(std::string_view(line.begin() + 1, line.end()),
-                  [](RingBufferString str) { std::cout << str << '\n'; });
+                  [](std::string_view str) { std::cout << str << '\n'; });
     }
   }
 
